@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set AUTOENV_AUTH_FILE ~/.autoenv_authorized
-
 if [ -z "$AUTOENV_ENV_FILENAME" ]
     set AUTOENV_ENV_FILENAME ".env"
 end
 
 function autoenv_init
+  set defIFS $IFS
+  set IFS (echo -en "\n\b")
+
   #typeset target home file
   #typeset -a files
   set target $argv[1]
@@ -13,11 +15,11 @@ function autoenv_init
   set current_dir $PWD
 
   while [ $PWD != "/" -a $PWD != "$home" ]
-    set file "$PWD/.env"
+    set file "$PWD/$AUTOENV_ENV_FILENAME"
     if [ -e $file ]
       set files $files $file
     end
-    builtin cd ..
+    builtin cd .. >/dev/null 2>&1
   end
   builtin cd $current_dir
 
@@ -28,10 +30,12 @@ function autoenv_init
       autoenv_check_authz_and_run "$envfile"
     end
   end
+
+  set IFS $defIFS
 end
 
-functio autoenv_run
-  set file "$(realpath "$argv[1]")"
+function autoenv_run
+  set file "(realpath "$argv[1]")"
   autoenv_check_authz_and_run "$file"
 end
 
@@ -81,7 +85,7 @@ function autoenv_check_authz_and_run
     autoenv_env
     autoenv_printf "Are you sure you want to allow this? (y/N) "
     read answer
-    if [ $answer = "y" ] || [ "$answer" = "Y" ]
+    if [ $answer = "y" -o $answer = "Y" ]
       autoenv_authorize_env "$envfile"
       autoenv_source "$envfile"
     end
@@ -103,14 +107,17 @@ function autoenv_authorize_env
 end
 
 function autoenv_source
-  typeset allexport
-  allexport=$(set +o | \grep allexport)
-  set -a
-  AUTOENV_CUR_FILE=$1
-  AUTOENV_CUR_DIR=$(dirname $1)
-  source "$1"
-  eval "$allexport"
-  unset AUTOENV_CUR_FILE AUTOENV_CUR_DIR
+  #typeset allexport
+  # TODO: find out about allexport
+  #set allexport (set +o | \grep allexport)
+  # TODO: Lookup fish's set permissions so they behave as set -a
+  #set -a
+  set AUTOENV_CUR_FILE $argv[1]
+  set AUTOENV_CUR_DIR (dirname $argv[1])
+  source "$argv[1]"
+  #eval "$allexport"
+  set -e AUTOENV_CUR_FILE
+  set -e AUTOENV_CUR_DIR
 end
 
 function autoenv_cd
@@ -122,8 +129,12 @@ function autoenv_cd
   end
 end
 
-function cd
-  autoenv_cd "$argv"
+function enable_autoenv
+    function cd
+        autoenv_cd "$argv"
+    end
+
+    cd .
 end
 
 # probe to see if we have access to a shasum command, otherwise disable autoenv
