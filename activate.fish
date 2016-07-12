@@ -107,17 +107,12 @@ function autoenv_authorize_env
 end
 
 function autoenv_source
-  #typeset allexport
-  # TODO: find out about allexport
-  #set allexport (set +o | \grep allexport)
-  # TODO: Lookup fish's set permissions so they behave as set -a
-  #set -a
-  set AUTOENV_CUR_FILE $argv[1]
-  set AUTOENV_CUR_DIR (dirname $argv[1])
+  #TODO: Why are global vars not being passed to sourced script?
+  set -g AUTOENV_CUR_FILE $argv[1]
+  set -g AUTOENV_CUR_DIR (dirname $argv[1])
   source "$argv[1]"
-  #eval "$allexport"
-  set -e AUTOENV_CUR_FILE
-  set -e AUTOENV_CUR_DIR
+  #set -e AUTOENV_CUR_FILE
+  #set -e AUTOENV_CUR_DIR
 end
 
 function autoenv_cd

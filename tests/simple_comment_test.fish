@@ -4,7 +4,7 @@ source activate.fish
 if [ -z "$TMPDIR" ]
     set TMPDIR "/tmp"
 end
-set self_PID %self 
+set self_PID %self
 set test_dir "$TMPDIR/_autoenv_$self_PID"
 
 mkdir -p "$test_dir/a/b"
