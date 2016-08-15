@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set AUTOENV_AUTH_FILE ~/.autoenv_authorized
 if [ -z "$AUTOENV_ENV_FILENAME" ]
     set AUTOENV_ENV_FILENAME ".env"
@@ -8,8 +9,6 @@ function autoenv_init
   set defIFS $IFS
   set IFS (echo -en "\n\b")
 
-  #typeset target home file
-  #typeset -a files
   set target $argv[1]
   set home (dirname $HOME)
   set current_dir $PWD
